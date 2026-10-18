@@ -1,0 +1,29 @@
+// Este arquivo DESCREVE as tabelas. O Prisma gera o SQL e o cliente tipado a partir daqui.
+// Comandos: npx prisma migrate dev (cria/aplica migração) | npx prisma studio (ver dados no navegador)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Cliente {
+  id          Int      @id @default(autoincrement())
+  nome        String   @db.VarChar(150)
+  cpf         String   @unique @db.VarChar(14)
+  telefone    String   @db.VarChar(20)
+  cep         String   @db.VarChar(9)
+  cidade      String   @db.VarChar(100)
+  estado      String   @db.VarChar(2)
+  endereco    String   @db.VarChar(150)
+  bairro      String   @db.VarChar(100)
+  numero      String   @db.VarChar(20)
+  complemento String?  @db.VarChar(100)
+  ativo       Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("clientes")
+}
