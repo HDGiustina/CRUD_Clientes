@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, Moon, Plus, Sun } from 'lucide-react';import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ArrowUpRight, Moon, Plus, Sun } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -11,8 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { listarClientes } from '@/lib/api';
+import { atualizarCliente, criarCliente, inativarCliente, listarClientes } from '@/lib/api';
 import { useTema } from '@/lib/tema';
+import ClienteForm from '@/components/ClienteForm';
 
 function enderecoCompleto(c) {
   return `${c.endereco}, ${c.numero} - ${c.bairro}, ${c.cidade}/${c.estado} · CEP ${c.cep}`;
@@ -25,6 +27,9 @@ export default function App() {
   const [filtroNome, setFiltroNome] = useState('');
   const [filtroCpf, setFiltroCpf] = useState('');
   const [modalAberto, setModalAberto] = useState(false);
+  const [editando, setEditando] = useState(null);
+  const [salvando, setSalvando] = useState(false);
+  const [erroForm, setErroForm] = useState('');
   const [tema, alternarTema] = useTema();
 
   async function carregar(filtros = {}) {
@@ -33,7 +38,11 @@ export default function App() {
     try {
       setClientes(await listarClientes(filtros));
     } catch (e) {
-      setErro(e.message === 'Failed to fetch' ? 'API fora do ar. Suba o back (npm run dev em api/).' : e.message);
+      setErro(
+        e.message === 'Failed to fetch'
+          ? 'Não foi possível conectar ao servidor. Verifique se ele está em execução e tente novamente.'
+          : e.message,
+      );
     } finally {
       setCarregando(false);
     }
@@ -54,9 +63,58 @@ export default function App() {
     carregar();
   }
 
+  function abrirNovo() {
+    setEditando(null);
+    setErroForm('');
+    setModalAberto(true);
+  }
+
+  function abrirEdicao(cliente) {
+    setEditando(cliente);
+    setErroForm('');
+    setModalAberto(true);
+  }
+
+  // Salva criando (modal novo) ou atualizando (modal edição); 409 vira mensagem no form.
+  async function salvar(valores) {
+    setSalvando(true);
+    setErroForm('');
+    try {
+      if (editando) {
+        await atualizarCliente(editando.id, valores);
+      } else {
+        await criarCliente(valores);
+      }
+      setModalAberto(false);
+      carregar({ nome: filtroNome, cpf: filtroCpf });
+    } catch (e) {
+      setErroForm(e.message);
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  const [inativando, setInativando] = useState(null);
+
+  function pedirInativacao(cliente) {
+    setInativando(cliente);
+  }
+
+  async function confirmarInativacao() {
+    if (!inativando) return;
+    try {
+      await inativarCliente(inativando.id);
+      setInativando(null);
+      carregar({ nome: filtroNome, cpf: filtroCpf });
+    } catch (e) {
+      setInativando(null);
+      setErro(e.message);
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 sm:px-6">
         <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Cadastro · Tela única</p>
@@ -76,14 +134,14 @@ export default function App() {
             >
               {tema === 'escuro' ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </Button>
-            <Button onClick={() => setModalAberto(true)} className="font-extrabold uppercase tracking-[0.12em]">
+            <Button onClick={abrirNovo} className="font-extrabold uppercase tracking-[0.12em]">
               <Plus className="size-4" />
               Novo Cliente
             </Button>
           </div>
         </header>
 
-        <main>
+        <main className="flex-1">
         <form onSubmit={buscar} className="mb-6 grid grid-cols-1 gap-3 rounded-lg border p-4 sm:grid-cols-[1fr_1fr_auto_auto]">
           <div className="space-y-1.5">
             <Label htmlFor="filtro-nome">Nome do cliente</Label>
@@ -111,17 +169,24 @@ export default function App() {
           </div>
         </form>
 
-        {erro && <p className="mb-4 rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm">{erro}</p>}
+        {erro && (
+          <div className="mb-4 flex flex-col gap-3 rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <p>{erro}</p>
+            <Button type="button" variant="outline" size="sm" onClick={() => carregar({ nome: filtroNome, cpf: filtroCpf })}>
+              Tentar novamente
+            </Button>
+          </div>
+        )}
 
         <div className="overflow-x-auto rounded-lg border">
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>CPF</TableHead>
-                <TableHead>Telefone</TableHead>
-                <TableHead>Endereço completo</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+            <TableHeader className="bg-muted/60">
+              <TableRow className="hover:bg-muted/60">
+                <TableHead className="text-xs font-bold uppercase tracking-[0.12em]">Nome</TableHead>
+                <TableHead className="text-xs font-bold uppercase tracking-[0.12em]">CPF</TableHead>
+                <TableHead className="text-xs font-bold uppercase tracking-[0.12em]">Telefone</TableHead>
+                <TableHead className="text-xs font-bold uppercase tracking-[0.12em]">Endereço completo</TableHead>
+                <TableHead className="text-right text-xs font-bold uppercase tracking-[0.12em]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -139,17 +204,19 @@ export default function App() {
                 </TableRow>
               ) : (
                 clientes.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell className="font-medium">{c.nome}</TableCell>
-                    <TableCell className="tabular-nums">{c.cpf}</TableCell>
-                    <TableCell className="tabular-nums">{c.telefone}</TableCell>
-                    <TableCell>{enderecoCompleto(c)}</TableCell>
-                    <TableCell className="text-right">
+                  <TableRow key={c.id} className="border-b-2 hover:bg-muted/40">
+                    <TableCell className="py-4 align-top font-semibold">{c.nome}</TableCell>
+                    <TableCell className="py-4 align-top tabular-nums">{c.cpf}</TableCell>
+                    <TableCell className="py-4 align-top tabular-nums">{c.telefone}</TableCell>
+                    <TableCell className="max-w-72 truncate py-4 align-top text-sm" title={enderecoCompleto(c)}>
+                      {enderecoCompleto(c)}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap py-4 text-right align-top">
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm" disabled>
+                        <Button variant="outline" size="sm" onClick={() => abrirEdicao(c)}>
                           Editar
                         </Button>
-                        <Button variant="destructive" size="sm" disabled>
+                        <Button variant="destructive" size="sm" onClick={() => pedirInativacao(c)}>
                           Inativar
                         </Button>
                       </div>
@@ -179,11 +246,41 @@ export default function App() {
         </footer>
 
         <Dialog open={modalAberto} onOpenChange={setModalAberto}>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Novo Cliente</DialogTitle>
+              <DialogTitle>{editando ? 'Editar Cliente' : 'Novo Cliente'}</DialogTitle>
+              <DialogDescription>
+                {editando ? 'Altere os dados e salve.' : 'Preencha os dados. O CEP busca a cidade e o estado sozinhos.'}
+              </DialogDescription>
             </DialogHeader>
-            <p className="text-sm text-muted-foreground">O formulário chega na próxima etapa.</p>
+            <ClienteForm
+              key={editando ? editando.id : 'novo'}
+              inicial={editando}
+              salvando={salvando}
+              erroServidor={erroForm}
+              aoSalvar={salvar}
+              aoCancelar={() => setModalAberto(false)}
+            />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={Boolean(inativando)} onOpenChange={(aberto) => !aberto && setInativando(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Inativar cliente</DialogTitle>
+              <DialogDescription>
+                <span className="font-semibold text-foreground">{inativando?.nome}</span> vai sair da lista, mas os
+                dados continuam guardados no banco.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setInativando(null)}>
+                Cancelar
+              </Button>
+              <Button type="button" variant="destructive" onClick={confirmarInativacao}>
+                Inativar
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

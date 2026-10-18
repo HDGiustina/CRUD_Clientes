@@ -7,7 +7,8 @@ const clientesRouter = require('./routes/clientes');
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
-app.use(cors({ origin: ['http://localhost:5173'] }));
+// Em desenvolvimento a porta do Vite varia (5173, 5174…), então libera qualquer localhost.
+app.use(cors({ origin: [/^http:\/\/localhost:\d+$/] }));
 app.use(express.json());
 
 app.get('/health', (req, res) => res.json({ ok: true }));

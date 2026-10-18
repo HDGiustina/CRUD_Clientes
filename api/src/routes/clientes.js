@@ -25,6 +25,16 @@ function parseId(value) {
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
+// O front manda só dígitos, mas se chegar máscara (ex.: teste via curl),
+// limpamos aqui: no banco vai só dígito.
+function semMascara(corpo) {
+  const limpo = { ...corpo };
+  for (const campo of ['cpf', 'telefone', 'cep']) {
+    if (typeof limpo[campo] === 'string') limpo[campo] = limpo[campo].replace(/\D/g, '');
+  }
+  return limpo;
+}
+
 // Lista só clientes ATIVOS, com filtros opcionais por nome e CPF (busca parcial, sem diferenciar maiúsculas).
 router.get('/', async (req, res, next) => {
   try {
@@ -46,7 +56,7 @@ router.get('/', async (req, res, next) => {
 // Cria um cliente novo. CPF duplicado vira 409 (o banco barra pelo @unique e o Prisma avisa com P2002).
 router.post('/', async (req, res, next) => {
   try {
-    const dados = clienteSchema.parse(req.body);
+    const dados = clienteSchema.parse(semMascara(req.body));
     const cliente = await prisma.cliente.create({ data: dados });
     res.status(201).json(cliente);
   } catch (err) {
@@ -59,7 +69,7 @@ router.put('/:id', async (req, res, next) => {
   try {
     const id = parseId(req.params.id);
     if (!id) return res.status(400).json({ error: 'ID inválido' });
-    const dados = clienteSchema.parse(req.body);
+    const dados = clienteSchema.parse(semMascara(req.body));
     const cliente = await prisma.cliente.update({ where: { id }, data: dados });
     res.json(cliente);
   } catch (err) {

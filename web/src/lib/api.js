@@ -16,3 +16,23 @@ export function listarClientes({ nome = '', cpf = '' } = {}) {
   if (cpf) params.set('cpf', cpf);
   return fetch(`${API_URL}/clientes?${params}`).then(lerResposta);
 }
+
+export function criarCliente(dados) {
+  return fetch(`${API_URL}/clientes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dados),
+  }).then(lerResposta);
+}
+
+export function atualizarCliente(id, dados) {
+  return fetch(`${API_URL}/clientes/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dados),
+  }).then(lerResposta);
+}
+
+export function inativarCliente(id) {
+  return fetch(`${API_URL}/clientes/${id}/inativar`, { method: 'PATCH' }).then(lerResposta);
+}
