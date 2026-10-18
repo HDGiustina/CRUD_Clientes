@@ -1,0 +1,25 @@
+
+.vscode/
+
+# Dependências
+node_modules/
+
+# Ambiente (nunca commitar senhas/locais)
+.env
+.env.local
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+
+# Prisma
+prisma/migrations/dev.db*
+
+# Logs e SO
+*.log
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
