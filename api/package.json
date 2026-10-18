@@ -1,8 +1,8 @@
 {
-  "name": "nogle-api",
+  "name": "clientes-api",
   "version": "0.1.0",
   "private": true,
-  "description": "API do desafio Nogle - CRUD de clientes (Express + Prisma + Postgres)",
+  "description": "API de CRUD de clientes (Express + Prisma + Postgres)",
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",

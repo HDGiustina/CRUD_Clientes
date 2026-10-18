@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro de Clientes | Gestão em tela única</title>
+    <meta
+      name="description"
+      content="Cadastro, edição, filtros e inativação de clientes em tela única, com busca automática de endereço pelo CEP."
+    />
+    <meta name="author" content="Helena" />
+    <meta name="theme-color" content="#00ce03" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:title" content="Cadastro de Clientes | Gestão em tela única" />
+    <meta
+      property="og:description"
+      content="Cadastro, edição, filtros e inativação de clientes em tela única, com busca automática de endereço pelo CEP."
+    />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Cadastro de Clientes | Gestão em tela única" />
+    <meta
+      name="twitter:description"
+      content="Cadastro, edição, filtros e inativação de clientes em tela única, com busca automática de endereço pelo CEP."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;500;600;700&family=Raleway:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // Aplica o tema antes da primeira pintura (sem clarão): salvo > sistema.
+      try {
+        var t = localStorage.getItem('clientes-tema');
+        if (t !== 'claro' && t !== 'escuro') {
+          t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro';
+        }
+        if (t === 'escuro') document.documentElement.classList.add('dark');
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
