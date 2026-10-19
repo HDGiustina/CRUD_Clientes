@@ -29,11 +29,12 @@ const clienteSchema = z.object({
   estado: z.string().trim().min(1, 'Estado é obrigatório').max(2),
   endereco: z.string().trim().min(1, 'Endereço é obrigatório').max(150),
   bairro: z.string().trim().min(1, 'Bairro é obrigatório').max(100),
+  // Máximo de 9 dígitos (999.999.999), folgado abaixo do limite do INTEGER (2.147.483.647).
   numero: z
     .string()
     .trim()
     .min(1, 'Número é obrigatório')
-    .regex(/^(\d+)?$/, 'Número deve conter só números')
+    .regex(/^(\d{1,9})?$/, 'Número deve conter só números')
     .transform(Number),
   complemento: z.string().trim().max(100).optional().or(z.literal('')),
 });
