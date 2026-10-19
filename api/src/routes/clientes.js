@@ -9,21 +9,22 @@ const router = Router();
 // Regras dos campos obrigatórios do edital. O complemento é opcional (por isso .optional()).
 const clienteSchema = z.object({
   nome: z.string().trim().min(1, 'Nome é obrigatório').max(150),
+  // Regex aceita vazio de propósito: vazio cai só no "obrigatório", preenchido errado cai na regra.
   cpf: z
     .string()
     .trim()
     .min(1, 'CPF é obrigatório')
-    .regex(/^\d{11}$/, 'CPF deve ter 11 números'),
+    .regex(/^(\d{11})?$/, 'CPF deve ter 11 números'),
   telefone: z
     .string()
     .trim()
     .min(1, 'Telefone é obrigatório')
-    .regex(/^\d{10,11}$/, 'Telefone deve ter 10 ou 11 números'),
+    .regex(/^(\d{10,11})?$/, 'Telefone deve ter 10 ou 11 números'),
   cep: z
     .string()
     .trim()
     .min(1, 'CEP é obrigatório')
-    .regex(/^\d{8}$/, 'CEP deve ter 8 números'),
+    .regex(/^(\d{8})?$/, 'CEP deve ter 8 números'),
   cidade: z.string().trim().min(1, 'Cidade é obrigatória').max(100),
   estado: z.string().trim().min(1, 'Estado é obrigatório').max(2),
   endereco: z.string().trim().min(1, 'Endereço é obrigatório').max(150),
@@ -32,7 +33,7 @@ const clienteSchema = z.object({
     .string()
     .trim()
     .min(1, 'Número é obrigatório')
-    .regex(/^\d+$/, 'Número deve conter só números')
+    .regex(/^(\d+)?$/, 'Número deve conter só números')
     .transform(Number),
   complemento: z.string().trim().max(100).optional().or(z.literal('')),
 });

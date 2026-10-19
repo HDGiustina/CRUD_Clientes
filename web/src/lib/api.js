@@ -5,7 +5,10 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 async function lerResposta(res) {
   const dados = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(dados.error || `Erro ${res.status}`);
+    // O back manda `detalhes` por campo; guardamos a lista no erro para exibir um item por linha.
+    const erro = new Error(dados.error || `Erro ${res.status}`);
+    erro.detalhes = dados.detalhes?.map((d) => d.mensagem) ?? [];
+    throw erro;
   }
   return dados;
 }

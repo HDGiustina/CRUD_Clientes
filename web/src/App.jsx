@@ -29,7 +29,7 @@ export default function App() {
   const [modalAberto, setModalAberto] = useState(false);
   const [editando, setEditando] = useState(null);
   const [salvando, setSalvando] = useState(false);
-  const [erroForm, setErroForm] = useState('');
+  const [erroForm, setErroForm] = useState([]);
   const [tema, alternarTema] = useTema();
 
   async function carregar(filtros = {}) {
@@ -65,20 +65,20 @@ export default function App() {
 
   function abrirNovo() {
     setEditando(null);
-    setErroForm('');
+    setErroForm([]);
     setModalAberto(true);
   }
 
   function abrirEdicao(cliente) {
     setEditando(cliente);
-    setErroForm('');
+    setErroForm([]);
     setModalAberto(true);
   }
 
   // Salva criando (modal novo) ou atualizando (modal edição); 409 vira mensagem no form.
   async function salvar(valores) {
     setSalvando(true);
-    setErroForm('');
+    setErroForm([]);
     try {
       if (editando) {
         await atualizarCliente(editando.id, valores);
@@ -88,7 +88,7 @@ export default function App() {
       setModalAberto(false);
       carregar({ nome: filtroNome, cpf: filtroCpf });
     } catch (e) {
-      setErroForm(e.message);
+      setErroForm(e.detalhes?.length > 0 ? e.detalhes : [e.message]);
     } finally {
       setSalvando(false);
     }

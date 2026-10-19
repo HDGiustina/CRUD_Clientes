@@ -21,7 +21,7 @@ const CAMPOS_INICIAIS = {
 // Campos que o edital exige preenchidos (complemento é o único opcional).
 const OBRIGATORIOS = ['nome', 'cpf', 'telefone', 'cep', 'cidade', 'estado', 'endereco', 'bairro', 'numero'];
 
-export default function ClienteForm({ inicial = null, salvando = false, erroServidor = '', aoSalvar, aoCancelar }) {
+export default function ClienteForm({ inicial = null, salvando = false, erroServidor = [], aoSalvar, aoCancelar }) {
   const [valores, setValores] = useState(CAMPOS_INICIAIS);
   const [erros, setErros] = useState({});
   const [buscandoCep, setBuscandoCep] = useState(false);
@@ -132,10 +132,12 @@ export default function ClienteForm({ inicial = null, salvando = false, erroServ
       <div>{campo('estado', 'Estado (UF)', { maxLength: 2 })}</div>
       <div className="sm:col-span-2">{campo('complemento', 'Complemento (opcional)')}</div>
 
-      {erroServidor && (
-        <p className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm sm:col-span-2">
-          {erroServidor}
-        </p>
+      {erroServidor.length > 0 && (
+        <ul className="space-y-1 rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm sm:col-span-2">
+          {erroServidor.map((mensagem) => (
+            <li key={mensagem}>• {mensagem}</li>
+          ))}
+        </ul>
       )}
 
       <div className="flex justify-end gap-2 sm:col-span-2">
