@@ -39,6 +39,7 @@ export default function ClienteForm({ inicial = null, salvando = false, erroServ
         cpf: mascaraCPF(inicial.cpf),
         telefone: mascaraTelefone(inicial.telefone),
         cep: mascaraCEP(inicial.cep),
+        numero: String(inicial.numero ?? ''),
       });
     }
     setErros({});
@@ -54,6 +55,7 @@ export default function ClienteForm({ inicial = null, salvando = false, erroServ
     if (nome === 'cep') return aoDigitarCep(valor);
     if (nome === 'cpf') return alterar(nome, valor, mascaraCPF);
     if (nome === 'telefone') return alterar(nome, valor, mascaraTelefone);
+    if (nome === 'numero') return alterar(nome, soDigitos(valor));
     return alterar(nome, valor);
   }
   async function aoDigitarCep(valor) {
@@ -123,7 +125,7 @@ export default function ClienteForm({ inicial = null, salvando = false, erroServ
           {buscandoCep ? 'Buscando endereço…' : avisoCep}
         </p>
       </div>
-      <div>{campo('numero', 'Número')}</div>
+      <div>{campo('numero', 'Número', { inputMode: 'numeric' })}</div>
       <div>{campo('endereco', 'Endereço')}</div>
       <div>{campo('bairro', 'Bairro')}</div>
       <div>{campo('cidade', 'Cidade')}</div>

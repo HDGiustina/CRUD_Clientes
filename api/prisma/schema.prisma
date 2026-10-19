@@ -12,14 +12,14 @@ datasource db {
 model Cliente {
   id          Int      @id @default(autoincrement())
   nome        String   @db.VarChar(150)
-  cpf         String   @unique @db.VarChar(14)
-  telefone    String   @db.VarChar(20)
-  cep         String   @db.VarChar(9)
+  cpf         String   @unique @db.VarChar(11)
+  telefone    String   @db.VarChar(11)
+  cep         String   @db.VarChar(8)
   cidade      String   @db.VarChar(100)
   estado      String   @db.VarChar(2)
   endereco    String   @db.VarChar(150)
   bairro      String   @db.VarChar(100)
-  numero      String   @db.VarChar(20)
+  numero      Int
   complemento String?  @db.VarChar(100)
   ativo       Boolean  @default(true)
   createdAt   DateTime @default(now())
